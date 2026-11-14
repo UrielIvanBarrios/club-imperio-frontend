@@ -12,6 +12,7 @@ export interface UsuarioCreateRequest {
 
 // Actualización parcial: lo que viene null/ausente no se toca.
 // password = el ADMIN le resetea la contraseña a otro usuario (sin pedir la actual).
+// Con el id propio el back lo rechaza (400): la contraseña propia va por /api/auth/me/password.
 export interface UsuarioUpdateRequest {
   email?: string
   nombre?: string

@@ -23,8 +23,8 @@ export function DesactivarUsuarioDialog({ usuario, onClose }: Props) {
       titulo="Desactivar usuario"
       mensaje={
         <>
-          ¿Desactivar a <strong>{usuario?.nombre}</strong> ({usuario?.email})? Ya no va a poder iniciar sesión. Si ahora tiene la
-          sesión abierta, puede seguir usándola hasta que venza (como máximo 8 horas). Se puede reactivar después.
+          ¿Desactivar a <strong>{usuario?.nombre}</strong> ({usuario?.email})? Ya no va a poder iniciar sesión, y si ahora tiene la
+          sesión abierta, la pierde en su próxima acción. Se puede reactivar después.
         </>
       }
       textoConfirmar="Desactivar"

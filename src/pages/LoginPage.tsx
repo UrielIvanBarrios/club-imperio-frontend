@@ -16,7 +16,7 @@ const schema = z.object({
 type LoginForm = z.infer<typeof schema>
 
 export function LoginPage() {
-  const { usuario, sesionVencida, iniciarSesion } = useAuth()
+  const { usuario, motivoCierre, iniciarSesion } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from ?? '/'
@@ -48,9 +48,10 @@ export function LoginPage() {
           Iniciá sesión para continuar
         </Typography>
 
-        {sesionVencida && !mutation.isError && (
+        {/* Por qué se cerró la sesión, con el mensaje del back (token vencido, usuario desactivado…) */}
+        {motivoCierre && !mutation.isError && (
           <Alert severity="warning" sx={{ mb: 2 }}>
-            Tu sesión venció. Iniciá sesión nuevamente.
+            {motivoCierre}
           </Alert>
         )}
         {mutation.isError && (

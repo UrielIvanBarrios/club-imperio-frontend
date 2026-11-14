@@ -55,7 +55,7 @@ try {
   document.querySelector('button[aria-label="Cerrar sesión"]').click()
   ok(await esperar(() => location.pathname === '/login'), 'botón de logout → /login')
   ok(!session.getToken(), 'borra la sesión')
-  ok(!texto().includes('Tu sesión venció'), 'logout voluntario no muestra "sesión vencida"')
+  ok(!document.querySelector('.MuiAlert-colorWarning'), 'logout voluntario no muestra ningún aviso de sesión')
 
   paso('[8] Login USER y permisos')
   await login(USER)
@@ -82,7 +82,7 @@ try {
     ok(e.status === 401, `back responde 401: "${e.message}"`)
   }
   ok(await esperar(() => location.pathname === '/login'), 'el front redirige a /login solo')
-  ok(await esperar(() => texto().includes('Tu sesión venció')), 'muestra "Tu sesión venció"')
+  ok(await esperar(() => texto().includes('Sesión inválida o vencida. Iniciá sesión nuevamente.')), 'muestra el motivo que manda el back')
   ok(!session.getToken(), 'la sesión quedó borrada')
   await login(USER)
   ok(await esperar(() => location.pathname === '/comisiones'), 'al reloguearse vuelve a /comisiones')

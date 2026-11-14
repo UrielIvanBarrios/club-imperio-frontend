@@ -24,6 +24,7 @@ export async function crearNavegador(urlInicial) {
   }
   // Estas existen en Node con otra implementación: se reemplazan por las del navegador simulado.
   // (FormData: React 19 arma un FormData del <form> al enviarlo y el de Node no acepta un form de jsdom.)
+  const FormDataNode = globalThis.FormData
   for (const k of ['window', 'document', 'navigator', 'localStorage', 'location', 'history', 'matchMedia', 'FormData']) {
     Object.defineProperty(globalThis, k, { value: k === 'window' ? w : w[k], configurable: true, writable: true })
   }
@@ -50,7 +51,9 @@ export async function crearNavegador(urlInicial) {
 
   // ---------- helpers de interacción ----------
   const texto = () => document.body.textContent
-  const esperar = async (pred, ms = 10000) => {
+  // Espera máxima por condición. En una máquina cargada se puede subir: E2E_TIMEOUT_MS=20000 npm run test:e2e
+  const ESPERA = Number(process.env.E2E_TIMEOUT_MS) || 10000
+  const esperar = async (pred, ms = ESPERA) => {
     const t0 = Date.now()
     while (Date.now() - t0 < ms) {
       if (pred()) return true
@@ -114,7 +117,20 @@ export async function crearNavegador(urlInicial) {
   }
 
   // Simula un back lento (para ver "Guardando...") o caído
-  const fetchReal = globalThis.fetch
+  // La app arma el FormData del navegador (jsdom) y fetch es el de Node, que solo sabe mandar el suyo.
+  // Se copia campo por campo justo antes de enviar: es lo que en el navegador real hace fetch solo.
+  const fetchNode = globalThis.fetch
+  const fetchReal = async (url, init = {}) => {
+    if (init.body instanceof w.FormData) {
+      const form = new FormDataNode()
+      for (const [k, v] of init.body.entries()) {
+        form.append(k, v instanceof w.Blob ? new File([await v.arrayBuffer()], v.name, { type: v.type }) : v)
+      }
+      init = { ...init, body: form }
+    }
+    return fetchNode(url, init)
+  }
+  globalThis.fetch = fetchReal
   const red = {
     lenta: (ms = 400) => { globalThis.fetch = async (...a) => { await pausa(ms); return fetchReal(...a) } },
     caida: () => { globalThis.fetch = () => Promise.reject(new TypeError('Failed to fetch')) },

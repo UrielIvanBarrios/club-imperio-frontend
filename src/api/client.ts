@@ -14,19 +14,29 @@ export class ApiError extends Error {
   }
 }
 
-// Quién se entera cuando el back responde 401: lo registra el AuthProvider.
-let onUnauthorized: () => void = () => {}
-export function setUnauthorizedHandler(handler: () => void) {
+// Quién se entera cuando el back responde 401 o 403: lo registra el AuthProvider.
+// 401 = la sesión ya no sirve (token vencido o inválido, o usuario desactivado): se pasa el
+// mensaje del back para que el login explique por qué.
+// 403 = la sesión sirve pero el rol no alcanza: el back usa el rol actual de la base, y puede
+// ser distinto del que quedó guardado en el front (ej: a un ADMIN lo bajaron a USER).
+let onUnauthorized: (mensaje: string) => void = () => {}
+export function setUnauthorizedHandler(handler: (mensaje: string) => void) {
   onUnauthorized = handler
+}
+let onForbidden: () => void = () => {}
+export function setForbiddenHandler(handler: () => void) {
+  onForbidden = handler
 }
 
 interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown
   // false solo para el login: no manda token y un 401 no cierra la sesión.
   auth?: boolean
+  // 'blob' para descargas (ej: la plantilla de importación). Los errores igual vienen en JSON.
+  respuesta?: 'json' | 'blob'
 }
 
-export async function api<T>(path: string, { body, auth = true, headers, ...init }: RequestOptions = {}): Promise<T> {
+export async function api<T>(path: string, { body, auth = true, respuesta = 'json', headers, ...init }: RequestOptions = {}): Promise<T> {
   const finalHeaders = new Headers(headers)
   const isFormData = body instanceof FormData
   if (body !== undefined && !isFormData) finalHeaders.set('Content-Type', 'application/json')
@@ -50,13 +60,15 @@ export async function api<T>(path: string, { body, auth = true, headers, ...init
     const message = await readErrorMessage(response)
     if (response.status === 401 && auth) {
       clearSession()
-      onUnauthorized()
+      onUnauthorized(message)
     }
+    if (response.status === 403 && auth) onForbidden()
     throw new ApiError(response.status, message)
   }
 
   // 204 No Content (DELETE, PATCH): no hay cuerpo que parsear.
   if (response.status === 204) return undefined as T
+  if (respuesta === 'blob') return (await response.blob()) as T
   return (await response.json()) as T
 }
 

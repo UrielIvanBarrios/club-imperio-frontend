@@ -3,8 +3,9 @@ import type { LoginResponse, Usuario } from '../api/types'
 
 export interface AuthState {
   usuario: Usuario | null
-  // true si la sesión se cerró porque el back respondió 401 (token vencido o inválido)
-  sesionVencida: boolean
+  // Si la sesión se cerró porque el back respondió 401, su mensaje: "Sesión inválida o vencida…"
+  // o "Tu usuario fue desactivado…". null si se cerró a mano o nunca se abrió.
+  motivoCierre: string | null
   iniciarSesion: (respuesta: LoginResponse) => void
   cerrarSesion: () => void
   // Cuando el usuario logueado edita sus propios datos: refresca la sesión guardada (mismo token)
