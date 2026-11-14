@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Box, Button, Paper, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Paper, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 import { z } from 'zod'
 import { login } from '../api/auth'
 import { useAuth } from '../auth/AuthContext'
+import { FormTextField } from '../components/form/FormTextField'
 
 // Reglas del formulario: Zod valida y React Hook Form muestra el error debajo de cada campo.
 const schema = z.object({
@@ -20,7 +21,7 @@ export function LoginPage() {
   const location = useLocation()
   const from = (location.state as { from?: string } | null)?.from ?? '/'
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
+  const { control, handleSubmit } = useForm<LoginForm>({
     resolver: zodResolver(schema),
     defaultValues: { email: '', password: '' },
   })
@@ -59,27 +60,8 @@ export function LoginPage() {
         )}
 
         <Box component="form" noValidate onSubmit={handleSubmit((data) => mutation.mutate(data))}>
-          <TextField
-            label="Email"
-            type="email"
-            autoComplete="email"
-            autoFocus
-            fullWidth
-            margin="normal"
-            error={!!errors.email}
-            helperText={errors.email?.message}
-            {...register('email')}
-          />
-          <TextField
-            label="Contraseña"
-            type="password"
-            autoComplete="current-password"
-            fullWidth
-            margin="normal"
-            error={!!errors.password}
-            helperText={errors.password?.message}
-            {...register('password')}
-          />
+          <FormTextField control={control} name="email" label="Email" type="email" autoComplete="email" autoFocus margin="normal" />
+          <FormTextField control={control} name="password" label="Contraseña" type="password" autoComplete="current-password" margin="normal" />
           <Button type="submit" variant="contained" fullWidth size="large" sx={{ mt: 2 }} disabled={mutation.isPending}>
             {mutation.isPending ? 'Ingresando...' : 'Ingresar'}
           </Button>
