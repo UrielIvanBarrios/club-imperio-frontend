@@ -65,6 +65,11 @@ export async function crearNavegador(urlInicial) {
     el.dispatchEvent(new w.Event('input', { bubbles: true }))
   }
   const input = (name) => document.querySelector(`input[name="${name}"]`)
+  // Para campos sin name (buscadores, filtros): se ubican por su etiqueta visible
+  const campo = (etiqueta) =>
+    [...document.querySelectorAll('.MuiFormControl-root')]
+      .find((fc) => fc.querySelector('label')?.textContent === etiqueta)
+      ?.querySelector('input:not([aria-hidden="true"]), textarea')
   const setInput = (name, valor) => escribir(input(name), valor)
   const helper = (name) => input(name)?.closest('.MuiFormControl-root')?.querySelector('.MuiFormHelperText-root')?.textContent ?? ''
   const boton = (txt, raiz = document) => [...raiz.querySelectorAll('button, a')].find((b) => b.textContent.trim() === txt)
@@ -104,7 +109,7 @@ export async function crearNavegador(urlInicial) {
   }
 
   return {
-    w, vite, session, client, ok, paso, texto, esperar, escribir, input, setInput, helper, boton, submit,
+    w, vite, session, client, ok, paso, texto, esperar, escribir, input, campo, setInput, helper, boton, submit,
     irA, atras, h1, filas, dialogo, login, red, erroresConsola,
     // Login por API: para las pruebas que no son del login en sí
     async sesionAdmin() {

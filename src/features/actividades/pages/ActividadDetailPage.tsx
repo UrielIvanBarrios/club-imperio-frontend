@@ -1,3 +1,4 @@
+import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import BajaIcon from '@mui/icons-material/DoNotDisturbOn'
 import RestoreIcon from '@mui/icons-material/Restore'
@@ -5,7 +6,7 @@ import {
   Alert, Box, Button, Chip, Paper, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography,
 } from '@mui/material'
 import { useState, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '../../../api/client'
 import { EmptyState } from '../../../components/EmptyState'
 import { ErrorState } from '../../../components/ErrorState'
@@ -89,7 +90,14 @@ function Detalle({ actividad: a }: { actividad: Actividad }) {
           </Box>
         </Seccion>
 
-        <Seccion titulo="Comisiones">
+        <Seccion
+          titulo="Comisiones"
+          extra={a.activo && (
+            <Button size="small" startIcon={<AddIcon />} component={Link} to={`/comisiones/nueva?actividad=${a.actividadId}`}>
+              Nueva comisión
+            </Button>
+          )}
+        >
           <Comisiones actividadId={a.actividadId} />
         </Seccion>
       </Stack>
@@ -102,6 +110,7 @@ function Detalle({ actividad: a }: { actividad: Actividad }) {
 // Las comisiones cargan por su cuenta: si fallan, los datos de la actividad se siguen viendo.
 // Se piden también las dadas de baja, para ver el historial completo de la actividad.
 function Comisiones({ actividadId }: { actividadId: string }) {
+  const navigate = useNavigate()
   const q = useComisionesPorActividad(actividadId, { incluirInactivas: true })
   const columnas = ['Nombre', 'Horario', 'Cupo', 'Estado']
 
@@ -119,7 +128,12 @@ function Comisiones({ actividadId }: { actividadId: string }) {
       </TableHead>
       <TableBody>
         {ordenadas.map((c) => (
-          <TableRow key={c.comisionId} sx={c.activa ? undefined : { opacity: 0.6 }}>
+          <TableRow
+            key={c.comisionId}
+            hover
+            sx={{ cursor: 'pointer', ...(c.activa ? {} : { opacity: 0.6 }) }}
+            onClick={() => navigate(`/comisiones/${c.comisionId}`)}
+          >
             <TableCell>{c.nombre}</TableCell>
             <TableCell>{c.horario}</TableCell>
             <TableCell>{c.cupoMaximo ?? 'Sin tope'}</TableCell>

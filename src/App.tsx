@@ -3,12 +3,13 @@ import { ProtectedRoute } from './auth/ProtectedRoute'
 import { AppLayout } from './layout/AppLayout'
 import { MENU } from './layout/menu'
 import { actividadesRoutes } from './features/actividades/routes'
+import { comisionesRoutes } from './features/comisiones/routes'
 import { personasRoutes } from './features/personas/routes'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { LoginPage } from './pages/LoginPage'
 
 // Pantallas ya implementadas: tienen sus propias rutas. El resto del menú muestra "en construcción".
-const IMPLEMENTADAS = ['/personas', '/actividades']
+const IMPLEMENTADAS = ['/personas', '/actividades', '/comisiones']
 const conRol = (rol?: 'ADMIN') => MENU.filter((item) => item.rol === rol && !IMPLEMENTADAS.includes(item.path))
 const toRoute = (item: (typeof MENU)[number]) =>
   item.path === '/'
@@ -19,8 +20,8 @@ const toRoute = (item: (typeof MENU)[number]) =>
 //   /login                 → pública
 //   ProtectedRoute         → exige estar logueado
 //     AppLayout            → menú lateral + barra superior
-//       /personas/*, /actividades/* → features/<módulo>/routes.tsx
-//       /, /comisiones...  → pantallas (por ahora "en construcción")
+//       /personas/*, /actividades/*, /comisiones/* → features/<módulo>/routes.tsx
+//       /, /inscripciones... → pantallas (por ahora "en construcción")
 //       ProtectedRoute ADMIN → /importar, /usuarios
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
         children: [
           personasRoutes,
           actividadesRoutes,
+          comisionesRoutes,
           ...conRol(undefined).map(toRoute),
           { element: <ProtectedRoute rol="ADMIN" />, children: conRol('ADMIN').map(toRoute) },
         ],
