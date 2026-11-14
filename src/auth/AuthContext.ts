@@ -7,6 +7,8 @@ export interface AuthState {
   sesionVencida: boolean
   iniciarSesion: (respuesta: LoginResponse) => void
   cerrarSesion: () => void
+  // Cuando el usuario logueado edita sus propios datos: refresca la sesión guardada (mismo token)
+  actualizarUsuario: (usuario: Usuario) => void
 }
 
 export const AuthContext = createContext<AuthState | null>(null)

@@ -31,7 +31,8 @@ function NuevaComision() {
   // Viene con ?actividad=<id> desde el filtro del listado o desde el detalle de la actividad
   const [params] = useSearchParams()
 
-  // Solo se ofrecen las activas: el back no lo valida, pero una comisión en una actividad dada de baja no tiene sentido
+  // Solo se ofrecen las activas: el back también rechaza el alta en una actividad dada de baja,
+  // pero así el usuario ni siquiera puede elegirla
   const activas = useMemo(
     () => (actividades.data ?? []).filter((a) => a.activo).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')),
     [actividades.data],

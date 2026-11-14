@@ -1,7 +1,8 @@
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
 import {
-  AppBar, Box, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText,
+  AppBar, Box, Button, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText,
   Toolbar, Tooltip, Typography, useMediaQuery, useTheme,
 } from '@mui/material'
 import { useState } from 'react'
@@ -55,9 +56,11 @@ export function AppLayout() {
             </IconButton>
           )}
           <Box sx={{ flexGrow: 1 }} />
-          <Typography sx={{ mr: 1 }}>
-            {usuario?.nombre} · {usuario?.rol}
-          </Typography>
+          <Tooltip title="Mi perfil">
+            <Button color="inherit" component={NavLink} to="/perfil" startIcon={<AccountCircleIcon />} sx={{ mr: 1, textTransform: 'none' }}>
+              {usuario?.nombre} · {usuario?.rol}
+            </Button>
+          </Tooltip>
           <Tooltip title="Cerrar sesión">
             <IconButton color="inherit" onClick={cerrarSesion} aria-label="Cerrar sesión">
               <LogoutIcon />

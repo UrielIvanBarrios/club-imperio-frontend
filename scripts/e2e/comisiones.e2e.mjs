@@ -6,7 +6,7 @@ import { sql } from './lib/config.mjs'
 import { crearNavegador } from './lib/harness.mjs'
 
 const b = await crearNavegador('/comisiones')
-const { w, ok, paso, texto, esperar, input, campo, setInput, escribir, helper, boton, submit, irA, h1, filas, dialogo, client, red } = b
+const { ok, paso, texto, esperar, input, campo, setInput, escribir, helper, boton, submit, irA, h1, filas, dialogo, client, red, abrirSelect, opciones, cerrarMenu } = b
 
 const CORRIDA = Date.now().toString(36).toUpperCase()
 const PREFIJO = `TEST-FRONT ${CORRIDA}`
@@ -16,13 +16,6 @@ const DNIS = [0, 1, 2].map((i) => String(base + i))
 const etiquetas = () => document.querySelectorAll('.MuiTypography-caption')
 const dato = (label) => [...etiquetas()].find((c) => c.textContent === label)?.nextSibling?.textContent
 const filaDe = (txt) => [...document.querySelectorAll('tbody tr')].find((tr) => tr.textContent.includes(txt))
-// MUI Select se abre con mousedown (igual que en el navegador) y muestra las opciones en un menú aparte
-const abrirSelect = (nombre) => {
-  const combo = input(nombre).closest('.MuiInputBase-root').querySelector('[role="combobox"]')
-  combo.dispatchEvent(new w.MouseEvent('mousedown', { bubbles: true, button: 0 }))
-}
-const opciones = () => [...document.querySelectorAll('[role="option"]')].map((o) => o.textContent)
-const cerrarMenu = () => document.querySelector('[role="listbox"]')?.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
 
 try {
   await b.sesionAdmin()
@@ -61,7 +54,7 @@ try {
   submit()
   // Se espera el error del cupo: el del nombre ya estaba en pantalla desde el envío anterior
   ok(await esperar(() => helper('cupo') === 'Ingresá un número entero'), `cupo "abc" → "${helper('cupo')}"`)
-  ok(helper('nombre') === 'El nombre es obligatorio', 'solo espacios no cuenta como nombre (el back lo aceptaría)')
+  ok(helper('nombre') === 'El nombre es obligatorio', 'solo espacios no cuenta como nombre (el back también lo rechaza)')
   setInput('cupo', '0')
   submit()
   ok(await esperar(() => helper('cupo') === 'El cupo tiene que ser mayor a 0'), `cupo 0 → "${helper('cupo')}"`)
@@ -69,6 +62,11 @@ try {
   await esperar(() => input('actividadId') && input('actividadId').value === '')
   submit()
   ok(await esperar(() => helper('actividadId') === 'Elegí la actividad'), 'sin actividad → "Elegí la actividad"')
+  ok(helper('cupo') === 'Ingresá el cupo o marcá "Sin tope de cupo"', `cupo vacío sin marcar "Sin tope" → "${helper('cupo')}"`)
+  document.querySelector('input[name="sinTope"]').click()
+  ok(await esperar(() => input('cupo').disabled && helper('cupo') === 'Sin límite de inscriptos'), 'marcar "Sin tope de cupo" deshabilita el cupo y borra su error')
+  document.querySelector('input[name="sinTope"]').click()
+  ok(await esperar(() => !input('cupo').disabled), 'desmarcarlo lo vuelve a habilitar')
 
   paso('[4] Alta válida (eligiendo la actividad en el select)')
   abrirSelect('actividadId')
@@ -96,6 +94,7 @@ try {
   await esperar(() => input('actividadId')?.value === natacion.actividadId)
   setInput('nombre', 'turno mañana')
   setInput('horario', 'SÁBADOS 10:00')
+  document.querySelector('input[name="sinTope"]').click()
   submit()
   ok(await esperar(() => helper('nombre').startsWith('Ya existe una comisión para')), `"${helper('nombre')}"`)
   ok(location.pathname === '/comisiones/nueva', 'se queda en el formulario')
@@ -112,27 +111,47 @@ try {
 
   paso('[7] Edición: el cupo no puede quedar por debajo de los inscriptos')
   await irA(`/comisiones/${idManiana}/editar`)
-  ok(await esperar(() => input('nombre')?.value === 'Turno Mañana' && helper('cupo') === 'Inscriptos activos: 3 · no se puede quitar el tope'), `ayuda del cupo: "${helper('cupo')}"`)
+  ok(await esperar(() => input('nombre')?.value === 'Turno Mañana' && helper('cupo') === 'Inscriptos activos: 3' && !document.querySelector('input[name="sinTope"]').checked), `ayuda del cupo: "${helper('cupo')}"`)
   ok(!!input('actividadId').closest('.Mui-disabled') && helper('actividadId') === 'Una comisión no se puede cambiar de actividad', 'la actividad no se puede cambiar')
   setInput('cupo', '2')
   submit()
   ok(await esperar(() => helper('cupo') === 'El cupo no puede ser menor a los 3 inscriptos activos de la comisión.'), `cupo 2 → error del back en el campo: "${helper('cupo')}"`)
   ok(location.pathname.endsWith('/editar') && document.activeElement === input('cupo'), 'se queda en el formulario con foco en el cupo')
-  setInput('cupo', '')
-  submit()
-  ok(await esperar(() => helper('cupo') === 'Esta comisión ya tiene cupo: no se le puede quitar el tope'), 'vaciar el cupo → no se puede quitar el tope')
   setInput('cupo', '5')
   setInput('horario', 'Sábados 10:30')
   submit()
   ok(await esperar(() => location.pathname === `/comisiones/${idManiana}` && texto().includes('Cambios guardados')), 'guarda y vuelve al detalle con toast')
   ok(await esperar(() => dato('Cupo')?.startsWith('3 / 5 ocupados · 2 lugares libres') && dato('Horario') === 'Sábados 10:30'), `cupo y horario actualizados: "${dato('Cupo')}"`)
 
+  paso('[7.1] Quitar el tope a una comisión con inscriptos, y volver a ponerlo')
+  await irA(`/comisiones/${idManiana}/editar`)
+  await esperar(() => input('cupo')?.value === '5')
+  document.querySelector('input[name="sinTope"]').click()
+  ok(await esperar(() => input('cupo').disabled && input('cupo').value === ''), 'marcar "Sin tope de cupo" vacía y deshabilita el cupo')
+  submit()
+  ok(await esperar(() => location.pathname === `/comisiones/${idManiana}` && texto().includes('Cambios guardados')), 'guarda sin tope')
+  ok(await esperar(() => dato('Cupo') === '3 inscriptos (sin tope de cupo)'), `detalle: "${dato('Cupo')}"`)
+  ok((await client.api(`/api/comisiones/${idManiana}`)).cupoMaximo === null, 'el back guardó cupoMaximo = null')
+  await irA(`/comisiones/${idManiana}/editar`)
+  ok(await esperar(() => document.querySelector('input[name="sinTope"]')?.checked && input('cupo').disabled), 'al editarla de nuevo, la casilla viene marcada')
+  document.querySelector('input[name="sinTope"]').click()
+  setInput('cupo', '4')
+  submit()
+  ok(await esperar(() => dato('Cupo')?.startsWith('3 / 4 ocupados · 1 lugar libre')), `volver a poner tope: "${dato('Cupo')}"`)
+
   paso('[8] Comisión sin tope')
   const cTarde = await client.api(`/api/comisiones?actividadId=${natacion.actividadId}&nombre=Turno%20Tarde&horario=S%C3%A1bados%2016:00`, { method: 'POST' })
   await irA(`/comisiones/${cTarde.comisionId}`)
   ok(await esperar(() => dato('Cupo') === '0 inscriptos (sin tope de cupo)'), `detalle: "${dato('Cupo')}"`)
   await irA(`/comisiones/${cTarde.comisionId}/editar`)
-  ok(await esperar(() => helper('cupo') === 'Inscriptos activos: 0 · vacío = sin tope'), `edición: "${helper('cupo')}"`)
+  ok(await esperar(() => document.querySelector('input[name="sinTope"]')?.checked && input('cupo').disabled && helper('cupo') === 'Sin límite de inscriptos'), `edición: casilla marcada, "${helper('cupo')}"`)
+
+  paso('[8.1] El back también valida (las mismas reglas están en los dos lados)')
+  const rechazo = (p) => p.then(() => 'aceptado', (e) => e.message)
+  ok((await rechazo(client.api(`/api/comisiones?actividadId=${natacion.actividadId}&nombre=%20%20&horario=Lunes`, { method: 'POST' }))) === 'El nombre de la comisión no puede estar vacío.', 'POST con nombre en blanco → 400')
+  ok((await rechazo(client.api(`/api/comisiones?actividadId=${natacion.actividadId}&nombre=X&horario=%20`, { method: 'POST' }))) === 'El horario de la comisión no puede estar vacío.', 'POST con horario en blanco → 400')
+  ok((await rechazo(client.api(`/api/comisiones?actividadId=${baja.actividadId}&nombre=X&horario=Lunes`, { method: 'POST' }))) === 'No se puede crear una comisión en una actividad dada de baja.', 'POST en una actividad dada de baja → 400')
+  ok((await rechazo(client.api(`/api/comisiones/${cTarde.comisionId}`, { method: 'PUT', body: { cupoMaximo: 5, sinTope: true } }))).startsWith('No se puede enviar'), 'PUT con cupoMaximo y sinTope juntos → 400 (el front nunca lo manda)')
 
   paso('[9] Listado: filtro por actividad y búsqueda')
   await irA(`/comisiones?actividad=${natacion.actividadId}`)

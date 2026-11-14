@@ -4,12 +4,14 @@ import { AppLayout } from './layout/AppLayout'
 import { MENU } from './layout/menu'
 import { actividadesRoutes } from './features/actividades/routes'
 import { comisionesRoutes } from './features/comisiones/routes'
+import { PerfilPage } from './features/perfil/pages/PerfilPage'
 import { personasRoutes } from './features/personas/routes'
+import { usuariosRoutes } from './features/usuarios/routes'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { LoginPage } from './pages/LoginPage'
 
 // Pantallas ya implementadas: tienen sus propias rutas. El resto del menú muestra "en construcción".
-const IMPLEMENTADAS = ['/personas', '/actividades', '/comisiones']
+const IMPLEMENTADAS = ['/personas', '/actividades', '/comisiones', '/usuarios']
 const conRol = (rol?: 'ADMIN') => MENU.filter((item) => item.rol === rol && !IMPLEMENTADAS.includes(item.path))
 const toRoute = (item: (typeof MENU)[number]) =>
   item.path === '/'
@@ -21,8 +23,9 @@ const toRoute = (item: (typeof MENU)[number]) =>
 //   ProtectedRoute         → exige estar logueado
 //     AppLayout            → menú lateral + barra superior
 //       /personas/*, /actividades/*, /comisiones/* → features/<módulo>/routes.tsx
+//       /perfil            → el usuario logueado (ADMIN o USER)
 //       /, /inscripciones... → pantallas (por ahora "en construcción")
-//       ProtectedRoute ADMIN → /importar, /usuarios
+//       ProtectedRoute ADMIN → /usuarios/* (features/usuarios/routes.tsx), /importar
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   {
@@ -34,8 +37,9 @@ const router = createBrowserRouter([
           personasRoutes,
           actividadesRoutes,
           comisionesRoutes,
+          { path: 'perfil', element: <PerfilPage /> }, // cualquier usuario logueado (no está en el menú: se entra desde la barra)
           ...conRol(undefined).map(toRoute),
-          { element: <ProtectedRoute rol="ADMIN" />, children: conRol('ADMIN').map(toRoute) },
+          { element: <ProtectedRoute rol="ADMIN" />, children: [usuariosRoutes, ...conRol('ADMIN').map(toRoute)] },
         ],
       },
     ],

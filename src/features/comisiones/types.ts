@@ -20,9 +20,11 @@ export interface ComisionCreateRequest {
 }
 
 // Actualización parcial. No permite cambiar la actividad ni el estado (la baja es el DELETE).
-// cupoMaximo null se ignora: una vez que la comisión tiene cupo, no se le puede quitar.
+// Cupo: cupoMaximo: N lo pone o cambia; sinTope: true lo quita. Mandar los dos juntos es un 400.
+// (Hace falta sinTope porque cupoMaximo: null ya significa "no tocar el cupo".)
 export interface ComisionUpdateRequest {
   nombre?: string
   horario?: string
   cupoMaximo?: number
+  sinTope?: boolean
 }

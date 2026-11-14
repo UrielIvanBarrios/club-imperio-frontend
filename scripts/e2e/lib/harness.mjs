@@ -71,6 +71,19 @@ export async function crearNavegador(urlInicial) {
       .find((fc) => fc.querySelector('label')?.textContent === etiqueta)
       ?.querySelector('input:not([aria-hidden="true"]), textarea')
   const setInput = (name, valor) => escribir(input(name), valor)
+  // MUI Select se abre con mousedown (como en el navegador) y dibuja las opciones en un menú aparte
+  const abrirSelect = (name) => {
+    const combo = input(name).closest('.MuiInputBase-root').querySelector('[role="combobox"]')
+    combo.dispatchEvent(new w.MouseEvent('mousedown', { bubbles: true, button: 0 }))
+  }
+  const opciones = () => [...document.querySelectorAll('[role="option"]')].map((o) => o.textContent)
+  const cerrarMenu = () => document.querySelector('[role="listbox"]')?.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+  const elegir = async (name, texto) => {
+    abrirSelect(name)
+    await esperar(() => opciones().includes(texto))
+    ;[...document.querySelectorAll('[role="option"]')].find((o) => o.textContent === texto).click()
+    await esperar(() => !document.querySelector('[role="listbox"]'))
+  }
   const helper = (name) => input(name)?.closest('.MuiFormControl-root')?.querySelector('.MuiFormHelperText-root')?.textContent ?? ''
   const boton = (txt, raiz = document) => [...raiz.querySelectorAll('button, a')].find((b) => b.textContent.trim() === txt)
   const submit = () => document.querySelector('form button[type="submit"]').click()
@@ -110,6 +123,7 @@ export async function crearNavegador(urlInicial) {
 
   return {
     w, vite, session, client, ok, paso, texto, esperar, escribir, input, campo, setInput, helper, boton, submit,
+    abrirSelect, opciones, cerrarMenu, elegir,
     irA, atras, h1, filas, dialogo, login, red, erroresConsola,
     // Login por API: para las pruebas que no son del login en sí
     async sesionAdmin() {

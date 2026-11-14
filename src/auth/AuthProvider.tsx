@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { setUnauthorizedHandler } from '../api/client'
-import type { LoginResponse } from '../api/types'
+import type { LoginResponse, Usuario } from '../api/types'
 import { AuthContext } from './AuthContext'
 import { clearSession, loadSession, saveSession } from './session'
 
@@ -34,9 +34,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear()
   }, [queryClient])
 
+  // El token no cambia (sigue firmado con los datos del login): solo se actualiza lo que muestra el front.
+  const actualizarUsuario = useCallback((nuevo: Usuario) => {
+    const sesion = loadSession()
+    if (!sesion || sesion.usuario.usuarioId !== nuevo.usuarioId) return
+    saveSession({ ...sesion, usuario: nuevo })
+    setUsuario(nuevo)
+  }, [])
+
   const value = useMemo(
-    () => ({ usuario, sesionVencida, iniciarSesion, cerrarSesion }),
-    [usuario, sesionVencida, iniciarSesion, cerrarSesion],
+    () => ({ usuario, sesionVencida, iniciarSesion, cerrarSesion, actualizarUsuario }),
+    [usuario, sesionVencida, iniciarSesion, cerrarSesion, actualizarUsuario],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Box, Button, MenuItem, Paper } from '@mui/material'
-import { useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { Alert, Box, Button, Checkbox, FormControlLabel, MenuItem, Paper } from '@mui/material'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link } from 'react-router'
 import { aplicarErrorDelBack } from '../../../components/form/errorDelBack'
 import { FormTextField } from '../../../components/form/FormTextField'
@@ -21,12 +20,11 @@ interface Props {
 
 export function ComisionForm({ modo, actividades, valoresIniciales, inscriptosActivos, onSubmit, cancelarA }: Props) {
   const esEdicion = modo === 'edicion'
-  const teniaCupo = esEdicion && !!valoresIniciales?.cupo
-  const schema = useMemo(() => comisionSchema({ cupoObligatorio: teniaCupo }), [teniaCupo])
-  const { control, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm<ComisionFormValues>({
-    resolver: zodResolver(schema),
+  const { control, handleSubmit, setError, setValue, clearErrors, formState: { errors, isSubmitting } } = useForm<ComisionFormValues>({
+    resolver: zodResolver(comisionSchema),
     defaultValues: { ...valoresVacios, ...valoresIniciales },
   })
+  const sinTope = useWatch({ control, name: 'sinTope' })
 
   const enviar = async (valores: ComisionFormValues) => {
     try {
@@ -39,14 +37,16 @@ export function ComisionForm({ modo, actividades, valoresIniciales, inscriptosAc
         [/cupo/i, 'cupo'], //               "El cupo no puede ser menor a los 3 inscriptos activos…"
         [/horario/i, 'horario'],
         [/nombre/i, 'nombre'],
-        [/actividad/i, 'actividadId'],
+        [/actividad/i, 'actividadId'], //   "No se puede crear una comisión en una actividad dada de baja."
       ])
     }
   }
 
-  const ayudaCupo = !esEdicion
-    ? 'Vacío = sin tope'
-    : [`Inscriptos activos: ${inscriptosActivos ?? '…'}`, teniaCupo ? 'no se puede quitar el tope' : 'vacío = sin tope'].join(' · ')
+  const ayudaCupo = sinTope
+    ? 'Sin límite de inscriptos'
+    : esEdicion
+      ? `Inscriptos activos: ${inscriptosActivos ?? '…'}`
+      : 'Cantidad máxima de inscriptos'
 
   return (
     <Paper sx={{ p: 3 }}>
@@ -57,7 +57,7 @@ export function ComisionForm({ modo, actividades, valoresIniciales, inscriptosAc
           </Alert>
         )}
 
-        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
           <FormTextField
             control={control}
             name="actividadId"
@@ -73,7 +73,40 @@ export function ComisionForm({ modo, actividades, valoresIniciales, inscriptosAc
           </FormTextField>
           <FormTextField control={control} name="nombre" label="Nombre" required autoFocus={esEdicion} helperText="Ej: Turno Mañana, Sub-12" />
           <FormTextField control={control} name="horario" label="Horario" required helperText="Ej: Lunes y Miércoles 18:00" />
-          <FormTextField control={control} name="cupo" label="Cupo máximo" helperText={ayudaCupo} slotProps={{ htmlInput: { inputMode: 'numeric' } }} />
+          <Box>
+            <FormTextField
+              control={control}
+              name="cupo"
+              label="Cupo máximo"
+              required={!sinTope}
+              disabled={sinTope}
+              helperText={ayudaCupo}
+              slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+            />
+            <Controller
+              control={control}
+              name="sinTope"
+              render={({ field }) => (
+                <FormControlLabel
+                  label="Sin tope de cupo"
+                  control={
+                    <Checkbox
+                      name={field.name}
+                      checked={field.value}
+                      onChange={(e) => {
+                        field.onChange(e.target.checked)
+                        // Al marcarlo, el cupo deja de usarse: se vacía y se borra su error
+                        if (e.target.checked) {
+                          setValue('cupo', '')
+                          clearErrors('cupo')
+                        }
+                      }}
+                    />
+                  }
+                />
+              )}
+            />
+          </Box>
         </Box>
 
         <Box sx={{ mt: 3, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
