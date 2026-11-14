@@ -15,6 +15,7 @@ npm run test:e2e -- personas  # solo las que tengan "personas" en el nombre
 
 | Archivo | Qué prueba |
 |---|---|
+| `actividades.e2e.mjs` | ABM de Actividades: validaciones (precio con coma, negativo), alta, nombre duplicado (alta y renombre), edición (incluido vaciar la descripción), búsqueda sin tildes, paginación, **baja en cascada** (el modal cuenta las comisiones; después quedan inactivas y la inscripción dada de baja), reactivación, error con reintentar. Crea actividades `TEST-FRONT <corrida> …`, 2 comisiones y un socio, y los borra. |
 | `login.e2e.mjs` | Login, validaciones, rutas protegidas, roles (USER → 403 sin cerrar sesión), 401 → login, sesión vencida, back caído. Crea un USER temporal `e2e-…@clubimperio.com` y lo borra. |
 | `personas.e2e.mjs` | ABM de Personas: skeleton, validaciones, alta con membresía, DNI duplicado, edición (incluido vaciar el email), búsqueda, paginación, baja con confirmación, reactivación, error con reintentar, links inválidos. Crea 9 personas `TEST-FRONT` (DNI `99xxxxxx`) y las borra. |
 
@@ -28,4 +29,4 @@ npm run test:e2e -- personas  # solo las que tengan "personas" en el nombre
 | `E2E_DB_PASSWORD` (y `PGHOST`, `PGUSER`, `PGDATABASE`) | Limpieza por SQL |
 | `E2E_PSQL` | Ruta a `psql`, si no está en el lugar de siempre |
 
-Si quedaran datos de una corrida cortada a la mitad: `scripts/sql/limpiar-personas-test-front.sql`.
+Si quedaran datos de una corrida cortada a la mitad: `scripts/sql/limpiar-actividades-test-front.sql` y después `scripts/sql/limpiar-personas-test-front.sql`.

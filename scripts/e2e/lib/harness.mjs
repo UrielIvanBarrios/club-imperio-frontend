@@ -60,7 +60,8 @@ export async function crearNavegador(urlInicial) {
   }
   const escribir = (el, valor) => {
     // Setter nativo + evento input: es lo que hace el navegador cuando el usuario tipea
-    Object.getOwnPropertyDescriptor(w.HTMLInputElement.prototype, 'value').set.call(el, valor)
+    const proto = el instanceof w.HTMLTextAreaElement ? w.HTMLTextAreaElement.prototype : w.HTMLInputElement.prototype
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, valor)
     el.dispatchEvent(new w.Event('input', { bubbles: true }))
   }
   const input = (name) => document.querySelector(`input[name="${name}"]`)

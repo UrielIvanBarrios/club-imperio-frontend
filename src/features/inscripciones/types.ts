@@ -1,22 +1,6 @@
-// El back devuelve las entidades JPA tal cual (sin DTO): comisión y actividad vienen anidadas.
+import type { Comision } from '../comisiones/types'
 
-export interface Actividad {
-  actividadId: string
-  nombre: string
-  descripcion: string | null
-  precioMensual: number
-  activo: boolean
-}
-
-export interface Comision {
-  comisionId: string
-  actividad: Actividad
-  nombre: string
-  horario: string
-  cupoMaximo: number | null
-  activa: boolean
-}
-
+// El back devuelve la entidad JPA tal cual (sin DTO): la comisión y su actividad vienen anidadas.
 export interface Inscripcion {
   inscripcionId: string
   comision: Comision

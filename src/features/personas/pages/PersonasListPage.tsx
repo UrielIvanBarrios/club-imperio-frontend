@@ -2,11 +2,12 @@ import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
 import { Box, Button, LinearProgress, MenuItem, Paper, TextField } from '@mui/material'
 import { useMemo, useState, type FormEvent } from 'react'
-import { Link, useSearchParams } from 'react-router'
+import { Link } from 'react-router'
 import { EmptyState } from '../../../components/EmptyState'
 import { ErrorState } from '../../../components/ErrorState'
 import { PageHeader } from '../../../components/PageHeader'
 import { TableSkeleton } from '../../../components/TableSkeleton'
+import { useParamsUrl } from '../../../lib/useParamsUrl'
 import { BajaPersonaDialog } from '../components/BajaPersonaDialog'
 import { COLUMNAS } from '../components/columnas'
 import { PersonasTable } from '../components/PersonasTable'
@@ -28,7 +29,7 @@ const porApellido = (a: Persona, b: Persona) =>
 export function PersonasListPage() {
   // Filtros, búsqueda y página viven en la URL (?estado=todos&pagina=2): al volver
   // del detalle con "atrás" se encuentra el listado como estaba, y se puede compartir el link.
-  const [params, setParams] = useSearchParams()
+  const { params, cambiar, limpiar } = useParamsUrl()
   const estado = (params.get('estado') as Estado) || 'activos'
   const socio = (params.get('socio') as Socio) || 'todos'
   const dniBuscado = params.get('dni')
@@ -38,16 +39,6 @@ export function PersonasListPage() {
   const [dniInput, setDniInput] = useState(dniBuscado ?? '')
   const [dniError, setDniError] = useState<string | null>(null)
   const [aDarDeBaja, setADarDeBaja] = useState<Persona | null>(null)
-
-  const cambiar = (cambios: Record<string, string | null>) => {
-    const nuevos = new URLSearchParams(params)
-    for (const [k, v] of Object.entries(cambios)) {
-      if (v === null) nuevos.delete(k)
-      else nuevos.set(k, v)
-    }
-    if (!('pagina' in cambios)) nuevos.delete('pagina') // cambiar un filtro vuelve a la página 1
-    setParams(nuevos, { replace: true })
-  }
 
   // Con DNI buscado se usa /buscar; si no, el listado con filtros. Solo una de las dos consultas corre.
   const listado = usePersonas(aFiltros(estado, socio), !dniBuscado)
@@ -135,7 +126,7 @@ export function PersonasListPage() {
           ) : hayFiltros ? (
             <EmptyState
               titulo="No hay personas que coincidan con los filtros"
-              accion={<Button onClick={() => setParams({}, { replace: true })}>Limpiar filtros</Button>}
+              accion={<Button onClick={limpiar}>Limpiar filtros</Button>}
             />
           ) : (
             <EmptyState

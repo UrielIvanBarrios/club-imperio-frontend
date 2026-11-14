@@ -7,6 +7,10 @@ export function formatFecha(iso?: string | null): string {
   return `${dia}/${mes}/${anio}`
 }
 
+const PESOS = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' })
+// 12500 → "$ 12.500,00"
+export const formatPrecio = (n: number) => PESOS.format(n)
+
 // Hoy en formato "aaaa-mm-dd", en hora local (es lo que usa <input type="date">).
 export function hoyISO(): string {
   const d = new Date()

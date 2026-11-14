@@ -4,6 +4,7 @@ import {
   IconButton, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, Tooltip,
 } from '@mui/material'
 import { useNavigate } from 'react-router'
+import { paginar } from '../../../lib/paginar'
 import type { Persona } from '../types'
 import { COLUMNAS } from './columnas'
 import { ChipEstado, ChipSocio } from './PersonaChips'
@@ -22,9 +23,7 @@ interface Props {
 
 export function PersonasTable({ personas, pagina: paginaPedida, porPagina, onPagina, onPorPagina, onBaja }: Props) {
   const navigate = useNavigate()
-  // Si una baja vació la última página, mostramos la anterior en vez de una tabla vacía.
-  const pagina = Math.min(paginaPedida, Math.max(0, Math.ceil(personas.length / porPagina) - 1))
-  const visibles = personas.slice(pagina * porPagina, pagina * porPagina + porPagina)
+  const { pagina, visibles } = paginar(personas, paginaPedida, porPagina)
 
   return (
     <>

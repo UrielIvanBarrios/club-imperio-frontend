@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Box, Button, Checkbox, FormControlLabel, Paper } from '@mui/material'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link } from 'react-router'
-import { ApiError } from '../../../api/client'
+import { aplicarErrorDelBack } from '../../../components/form/errorDelBack'
 import { FormTextField } from '../../../components/form/FormTextField'
 import { personaSchema, valoresVacios, type PersonaFormValues } from '../schema'
 
@@ -27,11 +27,8 @@ export function PersonaForm({ modo, valoresIniciales, onSubmit, cancelarA }: Pro
     try {
       await onSubmit(valores)
     } catch (e) {
-      const mensaje = e instanceof ApiError ? e.message : 'Error inesperado'
-      // Los errores del back son un texto suelto. Si habla del DNI (duplicado o formato),
-      // lo mostramos debajo de ese campo; si no, arriba del formulario.
-      if (e instanceof ApiError && e.status === 400 && /dni/i.test(mensaje)) setError('dni', { message: mensaje }, { shouldFocus: true })
-      else setError('root.server', { message: mensaje })
+      // Si el back habla del DNI (duplicado o formato), el mensaje va debajo de ese campo
+      aplicarErrorDelBack(e, setError, [[/dni/i, 'dni']])
     }
   }
 
