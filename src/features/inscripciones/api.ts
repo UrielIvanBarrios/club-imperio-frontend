@@ -1,5 +1,5 @@
 import { api } from '../../api/client'
-import type { Inscripcion } from './types'
+import type { Inscripcion, InscripcionCreateRequest } from './types'
 
 // Los dos listados traen solo las inscripciones activas
 export const inscripcionesApi = {
@@ -9,5 +9,9 @@ export const inscripcionesApi = {
 
   listarActivasPorComision(comisionId: string) {
     return api<Inscripcion[]>(`/api/inscripciones/comision/${comisionId}`)
+  },
+
+  inscribir({ dni, comisionId }: InscripcionCreateRequest) {
+    return api<Inscripcion>(`/api/inscripciones?${new URLSearchParams({ dni, comisionId })}`, { method: 'POST' })
   },
 }

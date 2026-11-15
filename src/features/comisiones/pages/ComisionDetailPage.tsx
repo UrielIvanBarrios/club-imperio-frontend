@@ -1,4 +1,6 @@
 import EditIcon from '@mui/icons-material/Edit'
+import EventAvailableIcon from '@mui/icons-material/EventAvailable'
+import HowToRegIcon from '@mui/icons-material/HowToReg'
 import BajaIcon from '@mui/icons-material/DoNotDisturbOn'
 import {
   Alert, Box, Button, Link as MuiLink, Paper, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography,
@@ -45,8 +47,15 @@ function Detalle({ comision: c }: { comision: Comision }) {
         titulo={c.nombre}
         migas={[{ label: 'Comisiones', to: '/comisiones' }, { label: `${c.actividad.nombre} · ${c.nombre}` }]}
         acciones={
+          // Dada de baja no acepta inscripciones ni asistencias: sin acciones
           c.activa && (
             <>
+              <Button variant="contained" startIcon={<HowToRegIcon />} component={Link} to={`/inscripciones?comision=${c.comisionId}`}>
+                Inscribir socio
+              </Button>
+              <Button variant="outlined" startIcon={<EventAvailableIcon />} component={Link} to={`/asistencia?actividad=${c.actividad.actividadId}&comision=${c.comisionId}`}>
+                Tomar asistencia
+              </Button>
               <Button variant="outlined" startIcon={<EditIcon />} component={Link} to={`/comisiones/${c.comisionId}/editar`}>
                 Editar
               </Button>

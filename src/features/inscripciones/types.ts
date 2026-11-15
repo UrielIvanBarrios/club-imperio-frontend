@@ -18,3 +18,10 @@ export interface Inscripcion {
   activo: boolean
   fechaBaja: string | null
 }
+
+// El alta va por query params: POST /api/inscripciones?dni=&comisionId=
+// El back valida persona activa, comisión activa, que no esté ya inscripto y el cupo (todo 400 con mensaje).
+export interface InscripcionCreateRequest {
+  dni: string
+  comisionId: string
+}

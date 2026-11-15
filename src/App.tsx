@@ -3,8 +3,10 @@ import { ProtectedRoute } from './auth/ProtectedRoute'
 import { AppLayout } from './layout/AppLayout'
 import { MENU } from './layout/menu'
 import { actividadesRoutes } from './features/actividades/routes'
+import { asistenciaRoutes } from './features/asistencia/routes'
 import { comisionesRoutes } from './features/comisiones/routes'
 import { importacionRoutes } from './features/importacion/routes'
+import { inscripcionesRoutes } from './features/inscripciones/routes'
 import { PerfilPage } from './features/perfil/pages/PerfilPage'
 import { personasRoutes } from './features/personas/routes'
 import { usuariosRoutes } from './features/usuarios/routes'
@@ -12,7 +14,7 @@ import { EnConstruccion } from './pages/EnConstruccion'
 import { LoginPage } from './pages/LoginPage'
 
 // Pantallas ya implementadas: tienen sus propias rutas. El resto del menú muestra "en construcción".
-const IMPLEMENTADAS = ['/personas', '/actividades', '/comisiones', '/usuarios', '/importar']
+const IMPLEMENTADAS = ['/personas', '/actividades', '/comisiones', '/inscripciones', '/asistencia', '/usuarios', '/importar']
 const conRol = (rol?: 'ADMIN') => MENU.filter((item) => item.rol === rol && !IMPLEMENTADAS.includes(item.path))
 const toRoute = (item: (typeof MENU)[number]) =>
   item.path === '/'
@@ -23,9 +25,9 @@ const toRoute = (item: (typeof MENU)[number]) =>
 //   /login                 → pública
 //   ProtectedRoute         → exige estar logueado
 //     AppLayout            → menú lateral + barra superior
-//       /personas/*, /actividades/*, /comisiones/* → features/<módulo>/routes.tsx
+//       /personas/*, /actividades/*, /comisiones/*, /inscripciones, /asistencia → features/<módulo>/routes.tsx
 //       /perfil            → el usuario logueado (ADMIN o USER)
-//       /, /inscripciones... → pantallas (por ahora "en construcción")
+//       /, /clases-prueba  → pantallas (por ahora "en construcción")
 //       ProtectedRoute ADMIN → /usuarios/*, /importar (features/<módulo>/routes.tsx)
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -38,6 +40,8 @@ const router = createBrowserRouter([
           personasRoutes,
           actividadesRoutes,
           comisionesRoutes,
+          inscripcionesRoutes,
+          asistenciaRoutes,
           { path: 'perfil', element: <PerfilPage /> }, // cualquier usuario logueado (no está en el menú: se entra desde la barra)
           ...conRol(undefined).map(toRoute),
           { element: <ProtectedRoute rol="ADMIN" />, children: [usuariosRoutes, importacionRoutes, ...conRol('ADMIN').map(toRoute)] },

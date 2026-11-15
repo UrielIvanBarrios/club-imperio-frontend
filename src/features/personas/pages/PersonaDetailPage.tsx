@@ -1,11 +1,12 @@
 import EditIcon from '@mui/icons-material/Edit'
+import HowToRegIcon from '@mui/icons-material/HowToReg'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
 import RestoreIcon from '@mui/icons-material/Restore'
 import {
   Alert, Box, Button, Paper, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography,
 } from '@mui/material'
 import { useState, type ReactNode } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { ApiError } from '../../../api/client'
 import { EmptyState } from '../../../components/EmptyState'
 import { ErrorState } from '../../../components/ErrorState'
@@ -13,6 +14,7 @@ import { PageHeader } from '../../../components/PageHeader'
 import { TableSkeleton } from '../../../components/TableSkeleton'
 import { useToast } from '../../../components/toast/ToastContext'
 import { esUuid, formatFecha } from '../../../lib/format'
+import { HistorialAsistencia } from '../../asistencia/components/HistorialAsistencia'
 import { useInscripcionesPorSocio } from '../../inscripciones/hooks'
 import { BajaPersonaDialog } from '../components/BajaPersonaDialog'
 import { ChipEstado, ChipSocio } from '../components/PersonaChips'
@@ -48,6 +50,12 @@ function Detalle({ persona: p }: { persona: Persona }) {
         migas={[{ label: 'Personas', to: '/personas' }, { label: `${p.apellido}, ${p.nombre}` }]}
         acciones={
           <>
+            {/* Solo una persona activa se puede inscribir (el back también lo valida) */}
+            {p.activo && (
+              <Button variant="contained" startIcon={<HowToRegIcon />} component={Link} to={`/inscripciones?persona=${p.personaId}`}>
+                Inscribir
+              </Button>
+            )}
             <Button variant="outlined" startIcon={<EditIcon />} component={Link} to={`/personas/${p.personaId}/editar`}>
               Editar
             </Button>
@@ -120,6 +128,10 @@ function Detalle({ persona: p }: { persona: Persona }) {
         <Seccion titulo="Inscripciones activas">
           <Inscripciones dni={p.dni} />
         </Seccion>
+
+        <Seccion titulo="Asistencia">
+          <HistorialAsistencia dni={p.dni} />
+        </Seccion>
       </Stack>
 
       <BajaPersonaDialog persona={bajaAbierta ? p : null} onClose={() => setBajaAbierta(false)} />
@@ -129,6 +141,7 @@ function Detalle({ persona: p }: { persona: Persona }) {
 
 // Cada sección del detalle carga por su cuenta: si fallan las inscripciones, los datos personales se siguen viendo.
 function Inscripciones({ dni }: { dni: string }) {
+  const navigate = useNavigate()
   const q = useInscripcionesPorSocio(dni)
   const columnas = ['Actividad', 'Comisión', 'Horario', 'Desde']
 
@@ -144,7 +157,7 @@ function Inscripciones({ dni }: { dni: string }) {
       </TableHead>
       <TableBody>
         {q.data.map((i) => (
-          <TableRow key={i.inscripcionId}>
+          <TableRow key={i.inscripcionId} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/comisiones/${i.comision.comisionId}`)}>
             <TableCell>{i.comision.actividad.nombre}</TableCell>
             <TableCell>{i.comision.nombre}</TableCell>
             <TableCell>{i.comision.horario}</TableCell>
