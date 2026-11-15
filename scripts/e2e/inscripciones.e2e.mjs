@@ -55,7 +55,8 @@ try {
   const cerrada = await comision('Cerrada', 'Sábado 18:00', 5)
   await api(`/api/comisiones/${cerrada.comisionId}`, 'DELETE')
   const [joaquin, , beto, carla] = await Promise.all(
-    ['Joaquín', 'Ana', 'Beto', 'Carla'].map((nombre, i) => client.api('/api/personas', { method: 'POST', body: { dni: DNIS[i], nombre, apellido: 'TEST-FRONT' } })),
+    // Joaquín es socio (con membresía): cubre que el back arme bien la inscripción de una persona socia
+    ['Joaquín', 'Ana', 'Beto', 'Carla'].map((nombre, i) => client.api('/api/personas', { method: 'POST', body: { dni: DNIS[i], nombre, apellido: 'TEST-FRONT', seAsocia: i === 0 } })),
   )
   await api(`/api/personas/${carla.personaId}`, 'DELETE')
 
@@ -103,6 +104,9 @@ try {
   red.normal()
   ok(await esperar(() => texto().includes(`Se inscribió a Joaquín TEST-FRONT en ${natacion.nombre} · Tres`)), 'toast con socio, actividad y comisión')
   ok(await esperar(() => !!filaDe('Martes 18:00')), 'el socio muestra la inscripción nueva')
+  // Joaquín tiene membresía: antes el back no podía armar el JSON de una persona socia (Persona ↔ Membresia)
+  const deJoaquin = await client.api(`/api/inscripciones/socio/${DNIS[0]}`)
+  ok(deJoaquin.length === 1 && deJoaquin[0].persona.esSocioActivo === true, 'con una persona socia, el back responde JSON válido con esSocioActivo')
 
   paso('[4] Desde el detalle del socio: el socio viene elegido')
   ok(boton('Inscribir')?.getAttribute('href') === `/inscripciones?persona=${joaquin.personaId}`, 'botón "Inscribir" en el detalle del socio')

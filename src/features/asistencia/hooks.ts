@@ -1,4 +1,5 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import { ApiError } from '../../api/client'
 import { inscripcionesKeys } from '../inscripciones/hooks'
 import { asistenciasApi } from './api'
 import type { Asistencia, AsistenciaClaseRequest } from './types'
@@ -40,15 +41,17 @@ export function useHistoriales(inscripcionIds: string[] | undefined) {
 // ---------- Escrituras ----------
 
 // Toda la clase en un solo request y una transacción en el back: se guarda todo o nada.
-// Se invalida también si falla: el rechazo más probable es que alguien cargó parte de la clase mientras
-// se marcaba (o dio de baja una inscripción), y la planilla tiene que mostrar cómo quedó.
+// Se invalida también si el back la rechaza (400): lo más probable es que alguien cargó parte de la clase
+// mientras se marcaba (o dio de baja una inscripción), y la planilla tiene que mostrar cómo quedó.
+// Sin conexión no se vuelve a pedir nada: solo demoraría el mensaje de error.
 // Se devuelve la Promise para que mutateAsync termine con la planilla ya actualizada.
 export function useGuardarClase() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (body: AsistenciaClaseRequest) => asistenciasApi.registrarClase(body),
     onSuccess: () => qc.invalidateQueries({ queryKey: asistenciasKeys.all }),
-    onError: (_e, body) =>
+    onError: (e, body) =>
+      e instanceof ApiError && e.status === 400 &&
       Promise.all([
         qc.invalidateQueries({ queryKey: asistenciasKeys.all }),
         qc.invalidateQueries({ queryKey: inscripcionesKeys.porComision(body.comisionId) }),
@@ -60,6 +63,6 @@ export function useCorregirAsistencia() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ asistenciaId, presente }: { asistenciaId: string; presente: boolean }) => asistenciasApi.corregir(asistenciaId, { presente }),
-    onSettled: () => qc.invalidateQueries({ queryKey: asistenciasKeys.all }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: asistenciasKeys.all }),
   })
 }

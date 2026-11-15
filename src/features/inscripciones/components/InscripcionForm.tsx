@@ -1,14 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Autocomplete, Box, Button, MenuItem, Paper, TextField, Typography } from '@mui/material'
-import { useMemo } from 'react'
+import { Alert, Box, Button, MenuItem, Paper, TextField } from '@mui/material'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { Link } from 'react-router'
 import { ErrorState } from '../../../components/ErrorState'
 import { aplicarErrorDelBack } from '../../../components/form/errorDelBack'
-import { normalizarTexto } from '../../../lib/paginar'
 import type { Actividad } from '../../actividades/types'
 import { useComisionesPorActividad } from '../../comisiones/hooks'
 import type { Comision } from '../../comisiones/types'
+import { PersonaAutocomplete } from '../../personas/components/PersonaAutocomplete'
 import type { Persona } from '../../personas/types'
 import { useInscripcionesPorSocio, useInscriptosDeComisiones } from '../hooks'
 import { inscripcionSchema, valoresVacios, type InscripcionFormValues } from '../schema'
@@ -19,17 +18,6 @@ interface Props {
   valoresIniciales?: Partial<InscripcionFormValues>
   onSubmit: (valores: InscripcionFormValues) => Promise<unknown>
   cancelarA: string
-}
-
-const MAX_RESULTADOS = 20
-
-// Busca por DNI, nombre o apellido, sin importar tildes ni mayúsculas ("perez" encuentra "Pérez")
-function filtrarPersonas(personas: Persona[], busqueda: string) {
-  const q = normalizarTexto(busqueda)
-  const coinciden = q
-    ? personas.filter((p) => normalizarTexto(`${p.dni} ${p.nombre} ${p.apellido} ${p.apellido}, ${p.nombre}`).includes(q))
-    : personas
-  return coinciden.slice(0, MAX_RESULTADOS)
 }
 
 // "3 lugares libres de 10" / "Completa" / "Sin tope de cupo"
@@ -48,10 +36,6 @@ export function InscripcionForm({ personas, actividades, valoresIniciales, onSub
   })
   const [personaId, actividadId, comisionId] = useWatch({ control, name: ['personaId', 'actividadId', 'comisionId'] })
 
-  const ordenadas = useMemo(
-    () => [...personas].sort((a, b) => a.apellido.localeCompare(b.apellido, 'es') || a.nombre.localeCompare(b.nombre, 'es')),
-    [personas],
-  )
   const persona = personas.find((p) => p.personaId === personaId)
 
   // Comisiones activas de la actividad elegida, con cuántos inscriptos tiene cada una
@@ -104,37 +88,16 @@ export function InscripcionForm({ personas, actividades, valoresIniciales, onSub
             control={control}
             name="personaId"
             render={({ field, fieldState }) => (
-              <Autocomplete
-                options={ordenadas}
-                value={persona ?? null}
-                onChange={(_, p) => field.onChange(p?.personaId ?? '')}
+              <PersonaAutocomplete
+                personas={personas}
+                value={field.value}
+                onChange={field.onChange}
                 onBlur={field.onBlur}
-                getOptionLabel={(p) => `${p.apellido}, ${p.nombre} · DNI ${p.dni}`}
-                getOptionDisabled={(p) => !p.activo} // el back no inscribe personas dadas de baja
-                isOptionEqualToValue={(a, b) => a.personaId === b.personaId}
-                filterOptions={(opciones, { inputValue }) => filtrarPersonas(opciones, inputValue)}
-                noOptionsText="No hay personas con ese DNI o nombre"
-                renderOption={({ key, ...props }, p) => (
-                  <li key={key} {...props}>
-                    <Box>
-                      <Typography>{p.apellido}, {p.nombre}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        DNI {p.dni}{p.activo ? '' : ' · Dada de baja: no se puede inscribir'}
-                      </Typography>
-                    </Box>
-                  </li>
-                )}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    name="personaId"
-                    label="Socio"
-                    required
-                    inputRef={field.ref}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message ?? `Buscá por DNI, nombre o apellido (se muestran hasta ${MAX_RESULTADOS})`}
-                  />
-                )}
+                inputRef={field.ref}
+                name="personaId"
+                label="Socio"
+                error={fieldState.error?.message}
+                motivoBaja="no se puede inscribir" // el back no inscribe personas dadas de baja
               />
             )}
           />

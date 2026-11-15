@@ -23,6 +23,13 @@ export const personasApi = {
     }
   },
 
+  // Conteo sin traer la lista: GET /api/personas/stats/count?activo=&esSocio= → { total }. activo es obligatorio.
+  contar({ activo, esSocio }: { activo: boolean; esSocio?: boolean }) {
+    const params = new URLSearchParams({ activo: String(activo) })
+    if (esSocio !== undefined) params.set('esSocio', String(esSocio))
+    return api<{ total: number }>(`/api/personas/stats/count?${params}`)
+  },
+
   obtener(id: string) {
     return api<Persona>(`/api/personas/${id}`)
   },

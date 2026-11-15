@@ -1,13 +1,15 @@
 import type { Comision } from '../comisiones/types'
 
-// El back devuelve la entidad JPA tal cual (sin DTO): la persona y la comisión (con su actividad) vienen anidadas.
-// De la persona se tipa solo lo que usa el front.
+// La comisión (con su actividad) viene anidada tal cual la entidad; la persona, como PersonaResponse
+// (el mismo DTO de /api/personas). De la persona se tipa solo lo que usa el front.
+// Lo comparten Inscripción, Asistencia (dentro de su inscripción) y Clase de prueba.
 export interface InscripcionPersona {
   personaId: string
   dni: string
   nombre: string
   apellido: string
   activo: boolean
+  esSocioActivo: boolean
 }
 
 export interface Inscripcion {

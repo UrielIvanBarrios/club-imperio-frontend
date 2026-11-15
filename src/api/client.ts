@@ -69,7 +69,13 @@ export async function api<T>(path: string, { body, auth = true, respuesta = 'jso
   // 204 No Content (DELETE, PATCH): no hay cuerpo que parsear.
   if (response.status === 204) return undefined as T
   if (respuesta === 'blob') return (await response.blob()) as T
-  return (await response.json()) as T
+  try {
+    return (await response.json()) as T
+  } catch {
+    // 2xx con un cuerpo que no es JSON válido (ej: el back cortó la respuesta a la mitad).
+    // Sin esto se vería el error técnico del parser.
+    throw new ApiError(response.status, 'La respuesta del servidor no se pudo leer. Recargá la pantalla para ver cómo quedaron los datos.')
+  }
 }
 
 async function readErrorMessage(response: Response): Promise<string> {

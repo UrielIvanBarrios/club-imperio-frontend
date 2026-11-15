@@ -1,3 +1,4 @@
+import AssignmentIcon from '@mui/icons-material/Assignment'
 import EditIcon from '@mui/icons-material/Edit'
 import HowToRegIcon from '@mui/icons-material/HowToReg'
 import PersonOffIcon from '@mui/icons-material/PersonOff'
@@ -50,10 +51,15 @@ function Detalle({ persona: p }: { persona: Persona }) {
         migas={[{ label: 'Personas', to: '/personas' }, { label: `${p.apellido}, ${p.nombre}` }]}
         acciones={
           <>
-            {/* Solo una persona activa se puede inscribir (el back también lo valida) */}
+            {/* Solo una persona activa se puede inscribir o pedir una clase de prueba (el back también lo valida) */}
             {p.activo && (
               <Button variant="contained" startIcon={<HowToRegIcon />} component={Link} to={`/inscripciones?persona=${p.personaId}`}>
                 Inscribir
+              </Button>
+            )}
+            {p.activo && (
+              <Button variant="outlined" startIcon={<AssignmentIcon />} component={Link} to={`/clases-prueba/nueva?persona=${p.personaId}`}>
+                Clase de prueba
               </Button>
             )}
             <Button variant="outlined" startIcon={<EditIcon />} component={Link} to={`/personas/${p.personaId}/editar`}>

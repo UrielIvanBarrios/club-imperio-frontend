@@ -11,6 +11,7 @@ export const personasKeys = {
   list: (filtros: PersonaFiltros) => [...personasKeys.all, 'list', filtros] as const,
   porDni: (dni: string) => [...personasKeys.all, 'dni', dni] as const,
   detail: (id: string) => [...personasKeys.all, 'detail', id] as const,
+  conteo: (filtros: { activo: boolean; esSocio?: boolean }) => [...personasKeys.all, 'conteo', filtros] as const,
 }
 
 // ---------- Lecturas (useQuery) ----------
@@ -28,6 +29,15 @@ export function usePersonaPorDni(dni: string | null) {
     queryKey: personasKeys.porDni(dni ?? ''),
     queryFn: () => personasApi.buscarPorDni(dni!),
     enabled: !!dni, // sin DNI cargado no se busca
+  })
+}
+
+// Para el dashboard: cuántas hay, sin traer la lista
+export function useConteoPersonas(filtros: { activo: boolean; esSocio?: boolean }) {
+  return useQuery({
+    queryKey: personasKeys.conteo(filtros),
+    queryFn: () => personasApi.contar(filtros),
+    select: (r) => r.total,
   })
 }
 

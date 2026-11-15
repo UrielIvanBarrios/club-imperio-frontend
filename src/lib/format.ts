@@ -7,6 +7,9 @@ export function formatFecha(iso?: string | null): string {
   return `${dia}/${mes}/${anio}`
 }
 
+// LocalDateTime "2026-11-20T10:00:00" → "20/11/2026 10:00"
+export const formatFechaHora = (iso?: string | null) => (iso ? `${formatFecha(iso)} ${iso.slice(11, 16)}` : '—')
+
 const PESOS = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' })
 // 12500 → "$ 12.500,00"
 export const formatPrecio = (n: number) => PESOS.format(n)

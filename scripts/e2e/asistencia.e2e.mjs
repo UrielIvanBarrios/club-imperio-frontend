@@ -60,8 +60,10 @@ try {
   const cerrada = await comision('Cerrada', 'Viernes 18:00')
   await client.api(`/api/comisiones/${cerrada.comisionId}`, { method: 'DELETE' })
   const alumnos = await Promise.all(
+    // Alumno1 es socio (con membresía): está en todas las clases de la planilla, así cubre que el back arme bien
+    // el lote, la clase y el historial de una persona socia
     ['Alumno1', 'Alumno2', 'Alumno3', 'Alumno4', 'Alumno5', 'Alumno6'].map((nombre, i) =>
-      client.api('/api/personas', { method: 'POST', body: { dni: DNIS[i], nombre, apellido: 'TEST-FRONT' } })),
+      client.api('/api/personas', { method: 'POST', body: { dni: DNIS[i], nombre, apellido: 'TEST-FRONT', seAsocia: i === 0 } })),
   )
   const ins = []
   for (const dni of DNIS.slice(0, 3)) ins.push(await inscribir(dni, planilla.comisionId))
@@ -115,6 +117,10 @@ try {
   ok(filaDe('Alumno2').textContent.includes('AusenteYa cargada') && !!corregirBtn('Alumno2'), 'cada fila muestra lo guardado y "Corregir"')
   const h2 = await historial(ins[1].inscripcionId)
   ok(h2.length === 1 && h2[0].fecha === HOY && h2[0].presente === false, 'el back guardó a Alumno2 ausente en la fecha elegida')
+  const deHoy = await deClase(planilla.comisionId, HOY)
+  const h1Socio = await historial(ins[0].inscripcionId)
+  ok(deHoy.find((a) => a.inscripcion.persona.dni === DNIS[0])?.inscripcion.persona.esSocioActivo === true && h1Socio[0]?.inscripcion.persona.esSocioActivo === true,
+    'con un socio en la clase, el GET de la clase y el historial devuelven JSON válido con esSocioActivo')
 
   paso('[4] Volver a la misma clase después')
   await irA('/personas')
