@@ -18,7 +18,7 @@ import { LoginPage } from './pages/LoginPage'
 //   ProtectedRoute         → exige estar logueado
 //     AppLayout            → menú lateral + barra superior
 //       /                  → dashboard
-//       /personas/*, /actividades/*, /comisiones/*, /inscripciones, /asistencia, /clases-prueba/* → features/<módulo>/routes.tsx
+//       /personas/*, /actividades/*, /comisiones/*, /inscripciones/*, /asistencia, /clases-prueba/* → features/<módulo>/routes.tsx
 //       /perfil            → el usuario logueado (ADMIN o USER)
 //       ProtectedRoute ADMIN → /usuarios/*, /importar (features/<módulo>/routes.tsx)
 const router = createBrowserRouter([

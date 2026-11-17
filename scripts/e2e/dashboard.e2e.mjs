@@ -77,7 +77,7 @@ try {
   paso('[4] Links y accesos rápidos')
   const hrefs = TITULOS.map((t) => boton('Ver', tarjeta(t))?.getAttribute('href'))
   ok(JSON.stringify(hrefs) === JSON.stringify(['/personas?socio=socios', '/actividades', '/comisiones', '/clases-prueba']), `"Ver" de cada contador: ${JSON.stringify(hrefs)}`)
-  const atajos = { 'Tomar asistencia': '/asistencia', 'Inscribir socio': '/inscripciones', 'Nueva clase de prueba': '/clases-prueba/nueva', 'Nueva persona': '/personas/nueva', 'Importar socios': '/importar' }
+  const atajos = { 'Tomar asistencia': '/asistencia', 'Inscribir socio': '/inscripciones/nueva', 'Nueva clase de prueba': '/clases-prueba/nueva', 'Nueva persona': '/personas/nueva', 'Importar socios': '/importar' }
   ok(Object.entries(atajos).every(([txt, href]) => boton(txt)?.getAttribute('href') === href), 'accesos rápidos, con "Importar socios" porque es ADMIN')
   boton('Ver', tarjeta('Clases de prueba pendientes')).click()
   ok(await esperar(() => location.pathname === '/clases-prueba' && h1() === 'Clases de prueba'), '"Ver" lleva a la pantalla')

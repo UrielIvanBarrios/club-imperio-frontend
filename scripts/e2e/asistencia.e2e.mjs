@@ -199,7 +199,7 @@ try {
   paso('[9] Comisión sin inscriptos')
   await elegir('comision', 'Vacía · Martes 18:00')
   ok(await esperar(() => texto().includes('La comisión no tiene inscriptos activos')), 'estado vacío')
-  ok(boton('Inscribir socio')?.getAttribute('href') === `/inscripciones?comision=${vacia.comisionId}`, 'con el atajo a inscribir en esa comisión')
+  ok(boton('Inscribir socio')?.getAttribute('href') === `/inscripciones/nueva?comision=${vacia.comisionId}`, 'con el atajo a inscribir en esa comisión')
 
   paso('[10] Link con una comisión dada de baja')
   await irA(`/asistencia?actividad=${futbol.actividadId}&comision=${cerrada.comisionId}`)

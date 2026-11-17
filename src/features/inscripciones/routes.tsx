@@ -1,9 +1,12 @@
 import type { RouteObject } from 'react-router'
 import { InscribirPage } from './pages/InscribirPage'
+import { InscripcionesListPage } from './pages/InscripcionesListPage'
 
-// El back no tiene "listar todas las inscripciones": se ven desde el socio o desde la comisión.
-// Esta ruta es el alta: /inscripciones?persona=<id> o ?comision=<id> para llegar con el dato precargado.
+// Sin detalle propio: cada fila del listado lleva al socio o a la comisión, donde ya se ve la inscripción.
 export const inscripcionesRoutes: RouteObject = {
   path: 'inscripciones',
-  element: <InscribirPage />,
+  children: [
+    { index: true, element: <InscripcionesListPage /> }, //  /inscripciones (con filtros en la URL)
+    { path: 'nueva', element: <InscribirPage /> }, //  /inscripciones/nueva?persona=<id> o ?comision=<id>
+  ],
 }

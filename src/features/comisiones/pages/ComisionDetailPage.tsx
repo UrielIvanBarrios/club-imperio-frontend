@@ -50,7 +50,7 @@ function Detalle({ comision: c }: { comision: Comision }) {
           // Dada de baja no acepta inscripciones ni asistencias: sin acciones
           c.activa && (
             <>
-              <Button variant="contained" startIcon={<HowToRegIcon />} component={Link} to={`/inscripciones?comision=${c.comisionId}`}>
+              <Button variant="contained" startIcon={<HowToRegIcon />} component={Link} to={`/inscripciones/nueva?comision=${c.comisionId}`}>
                 Inscribir socio
               </Button>
               <Button variant="outlined" startIcon={<EventAvailableIcon />} component={Link} to={`/asistencia?actividad=${c.actividad.actividadId}&comision=${c.comisionId}`}>

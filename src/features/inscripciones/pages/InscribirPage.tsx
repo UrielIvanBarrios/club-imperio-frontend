@@ -17,10 +17,11 @@ const FormSkeleton = () => (
   </Paper>
 )
 
-// /inscripciones                  → se elige todo
-// /inscripciones?persona=<id>     → desde el detalle del socio: el socio ya viene elegido
-// /inscripciones?comision=<id>    → desde el detalle de la comisión: actividad y comisión ya vienen elegidas
-// Al terminar (o cancelar) se vuelve a la pantalla de origen.
+// /inscripciones/nueva                  → desde el listado (o el dashboard): se elige todo
+// /inscripciones/nueva?persona=<id>     → desde el detalle del socio: el socio ya viene elegido
+// /inscripciones/nueva?comision=<id>    → desde el detalle de la comisión: actividad y comisión ya vienen elegidas
+// Al cancelar se vuelve a la pantalla de origen (sin origen, al listado). Al terminar también,
+// salvo sin origen: ahí se va al socio, que es donde se ve la inscripción nueva.
 export function InscribirPage() {
   const navigate = useNavigate()
   const toast = useToast()
@@ -41,12 +42,12 @@ export function InscribirPage() {
     [actividades.data],
   )
 
-  const volverA = comisionOrigen ? `/comisiones/${comisionOrigen.comisionId}` : personaOrigen ? `/personas/${personaOrigen.personaId}` : '/personas'
+  const volverA = comisionOrigen ? `/comisiones/${comisionOrigen.comisionId}` : personaOrigen ? `/personas/${personaOrigen.personaId}` : '/inscripciones'
   const migas: Miga[] = comisionOrigen
     ? [{ label: 'Comisiones', to: '/comisiones' }, { label: `${comisionOrigen.actividad.nombre} · ${comisionOrigen.nombre}`, to: volverA }, { label: 'Inscribir socio' }]
     : personaOrigen
       ? [{ label: 'Personas', to: '/personas' }, { label: `${personaOrigen.apellido}, ${personaOrigen.nombre}`, to: volverA }, { label: 'Inscribir' }]
-      : [{ label: 'Inscribir socio' }]
+      : [{ label: 'Inscripciones', to: '/inscripciones' }, { label: 'Inscribir socio' }]
 
   // Solo cuenta el error de la carga inicial: si falla un refresco (ej: después de un rechazo del back),
   // se sigue con los datos que ya había y el formulario no se pierde

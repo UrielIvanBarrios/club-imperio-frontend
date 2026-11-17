@@ -6,7 +6,7 @@
 import { sql } from './lib/config.mjs'
 import { crearNavegador, pausa } from './lib/harness.mjs'
 
-const b = await crearNavegador('/inscripciones')
+const b = await crearNavegador('/inscripciones/nueva')
 const { ok, paso, texto, esperar, input, escribir, helper, boton, submit, irA, h1, client, red, abrirSelect, opciones, cerrarMenu } = b
 
 const CORRIDA = Date.now().toString(36).toUpperCase()
@@ -109,7 +109,7 @@ try {
   ok(deJoaquin.length === 1 && deJoaquin[0].persona.esSocioActivo === true, 'con una persona socia, el back responde JSON válido con esSocioActivo')
 
   paso('[4] Desde el detalle del socio: el socio viene elegido')
-  ok(boton('Inscribir')?.getAttribute('href') === `/inscripciones?persona=${joaquin.personaId}`, 'botón "Inscribir" en el detalle del socio')
+  ok(boton('Inscribir')?.getAttribute('href') === `/inscripciones/nueva?persona=${joaquin.personaId}`, 'botón "Inscribir" en el detalle del socio')
   boton('Inscribir').click()
   ok(await esperar(() => location.search === `?persona=${joaquin.personaId}` && input('personaId')?.value.startsWith('TEST-FRONT, Joaquín')), 'el formulario abre con el socio elegido')
   ok(document.querySelector('.MuiBreadcrumbs-root')?.textContent === 'Personas/TEST-FRONT, Joaquín/Inscribir', 'breadcrumbs: Personas / socio / Inscribir')
@@ -124,7 +124,7 @@ try {
 
   paso('[5] Desde el detalle de la comisión: actividad y comisión vienen elegidas')
   await irA(`/comisiones/${uno.comisionId}`)
-  ok(await esperar(() => boton('Inscribir socio')?.getAttribute('href') === `/inscripciones?comision=${uno.comisionId}`), 'botón "Inscribir socio" en el detalle de la comisión')
+  ok(await esperar(() => boton('Inscribir socio')?.getAttribute('href') === `/inscripciones/nueva?comision=${uno.comisionId}`), 'botón "Inscribir socio" en el detalle de la comisión')
   boton('Inscribir socio').click()
   ok(await esperar(() => input('actividadId')?.value === natacion.actividadId && input('comisionId')?.value === uno.comisionId), 'el formulario abre con la actividad y la comisión elegidas')
   ok(document.querySelector('.MuiBreadcrumbs-root')?.textContent === `Comisiones/${natacion.nombre} · Uno/Inscribir socio`, 'breadcrumbs: Comisiones / comisión / Inscribir socio')
@@ -135,7 +135,7 @@ try {
   ok(await esperar(() => dato('Cupo')?.startsWith('1 / 1 ocupados · Completa') && !!filaDe('TEST-FRONT, Ana')), `la comisión la lista y queda completa: "${dato('Cupo')}"`)
 
   paso('[6] Comisión completa: se ve, pero no se puede elegir')
-  await irA('/inscripciones')
+  await irA('/inscripciones/nueva')
   await esperar(() => input('personaId'))
   await elegirSocio('beto', 'TEST-FRONT, Beto')
   await elegirOpcion('actividadId', natacion.nombre)
@@ -150,7 +150,7 @@ try {
   await api(`/api/inscripciones?dni=${DNIS[0]}&comisionId=${carrera.comisionId}`)
   submit()
   ok(await esperar(() => helper('comisionId') === 'Cupo agotado para la comisión: Carrera'), `cupo agotado: "${helper('comisionId')}"`)
-  ok(location.pathname === '/inscripciones', 'se queda en el formulario')
+  ok(location.pathname === '/inscripciones/nueva', 'se queda en el formulario')
   abrirSelect('comisionId')
   ok(await esperar(() => opcion('Carrera')?.textContent.endsWith('Completa (1 / 1)')), 'las opciones se actualizan: Carrera ahora figura completa')
   cerrarMenu()
@@ -174,7 +174,7 @@ try {
 
   paso('[8] Error con reintentar')
   red.caida()
-  await irA(`/inscripciones?comision=${libre.comisionId}`) // la comisión no está en caché
+  await irA(`/inscripciones/nueva?comision=${libre.comisionId}`) // la comisión no está en caché
   ok(await esperar(() => texto().includes('No se pudo conectar con el servidor') && !!boton('Reintentar'), 15000), 'back caído → mensaje entendible + Reintentar')
   red.normal()
   boton('Reintentar').click()

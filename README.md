@@ -9,7 +9,7 @@ Aplicación web para la administración del club: personas y socios, actividades
 | **Dashboard** | Contadores reales (socios activos, actividades, comisiones, clases de prueba pendientes) y accesos rápidos |
 | **Personas** | ABM de personas y socios, búsqueda por DNI, detalle con inscripciones e historial de asistencia |
 | **Actividades / Comisiones** | ABM, con el cupo ocupado de cada comisión y bajas en cascada |
-| **Inscripciones** | Inscribir un socio en una comisión viendo el cupo libre |
+| **Inscripciones** | Listado de todas las inscripciones con filtros por actividad, comisión y estado (activas, dadas de baja o todas) y búsqueda por DNI o nombre, que se aplican en el back y quedan en la URL. Desde ahí, inscribir un socio en una comisión viendo el cupo libre |
 | **Asistencia** | Planilla de una clase (comisión + fecha): marcar presente o ausente, guardar toda la clase junta y corregir lo cargado |
 | **Clases de prueba** | Registrar la clase que pide alguien que quiere conocer una actividad, marcar si vino y agregar observaciones |
 | **Importar socios** *(ADMIN)* | Carga masiva desde CSV o Excel, con vista previa y reporte de errores por fila |

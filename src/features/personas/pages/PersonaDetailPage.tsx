@@ -53,7 +53,7 @@ function Detalle({ persona: p }: { persona: Persona }) {
           <>
             {/* Solo una persona activa se puede inscribir o pedir una clase de prueba (el back también lo valida) */}
             {p.activo && (
-              <Button variant="contained" startIcon={<HowToRegIcon />} component={Link} to={`/inscripciones?persona=${p.personaId}`}>
+              <Button variant="contained" startIcon={<HowToRegIcon />} component={Link} to={`/inscripciones/nueva?persona=${p.personaId}`}>
                 Inscribir
               </Button>
             )}

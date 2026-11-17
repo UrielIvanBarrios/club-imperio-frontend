@@ -1,12 +1,27 @@
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query'
 import { comisionesKeys } from '../comisiones/hooks'
 import { personasKeys } from '../personas/hooks'
 import { inscripcionesApi } from './api'
+import type { InscripcionFiltros } from './types'
 
+// Todas empiezan con 'inscripciones': invalidar ['inscripciones'] refresca el listado,
+// las del socio y las de la comisión de una sola vez.
 export const inscripcionesKeys = {
   all: ['inscripciones'] as const,
+  listado: (filtros: InscripcionFiltros) => [...inscripcionesKeys.all, 'listado', filtros] as const,
   porSocio: (dni: string) => [...inscripcionesKeys.all, 'socio', dni] as const,
   porComision: (comisionId: string) => [...inscripcionesKeys.all, 'comision', comisionId] as const,
+}
+
+// La tabla de /inscripciones. Los filtros van al back (no se filtra en memoria): cada combinación
+// es una consulta con su propia clave de caché. keepPreviousData: mientras llega el resultado
+// de un filtro nuevo se sigue viendo el anterior (con la barra de "cargando"), sin volver al skeleton.
+export function useInscripciones(filtros: InscripcionFiltros) {
+  return useQuery({
+    queryKey: inscripcionesKeys.listado(filtros),
+    queryFn: () => inscripcionesApi.listar(filtros),
+    placeholderData: keepPreviousData,
+  })
 }
 
 export function useInscripcionesPorSocio(dni: string | undefined) {

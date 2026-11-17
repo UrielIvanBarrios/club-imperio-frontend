@@ -58,7 +58,7 @@ export function PlanillaAsistencia({ comision, fecha }: Props) {
       <EmptyState
         titulo="La comisión no tiene inscriptos activos"
         descripcion="Inscribí socios para poder tomar asistencia."
-        accion={<Button variant="outlined" component={Link} to={`/inscripciones?comision=${comision.comisionId}`}>Inscribir socio</Button>}
+        accion={<Button variant="outlined" component={Link} to={`/inscripciones/nueva?comision=${comision.comisionId}`}>Inscribir socio</Button>}
       />
     )
   }

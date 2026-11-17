@@ -80,7 +80,7 @@ export function DashboardPage() {
       </Typography>
       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
         <Atajo to="/asistencia" icono={<EventAvailableIcon />}>Tomar asistencia</Atajo>
-        <Atajo to="/inscripciones" icono={<HowToRegIcon />}>Inscribir socio</Atajo>
+        <Atajo to="/inscripciones/nueva" icono={<HowToRegIcon />}>Inscribir socio</Atajo>
         <Atajo to="/clases-prueba/nueva" icono={<AssignmentIcon />}>Nueva clase de prueba</Atajo>
         <Atajo to="/personas/nueva" icono={<PersonAddIcon />}>Nueva persona</Atajo>
         {usuario?.rol === 'ADMIN' && <Atajo to="/importar" icono={<UploadFileIcon />}>Importar socios</Atajo>}

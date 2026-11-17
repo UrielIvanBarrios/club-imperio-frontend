@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { inscripcionesKeys } from '../inscripciones/hooks'
 import { personasApi } from './api'
 import type { Persona, PersonaFiltros, PersonaUpdateRequest } from './types'
 
@@ -71,6 +72,8 @@ export function useActualizarPersona() {
     mutationFn: ({ id, data }: { id: string; data: PersonaUpdateRequest }) => personasApi.actualizar(id, data),
     onSuccess: (persona) => {
       qc.invalidateQueries({ queryKey: personasKeys.all })
+      // El listado de inscripciones muestra el nombre y apellido de la persona: también queda viejo
+      qc.invalidateQueries({ queryKey: inscripcionesKeys.all })
       qc.setQueryData(personasKeys.detail(persona.personaId), persona)
     },
   })

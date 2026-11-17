@@ -27,3 +27,29 @@ export interface InscripcionCreateRequest {
   dni: string
   comisionId: string
 }
+
+// ---------- Listado con filtros: GET /api/inscripciones ----------
+
+export type EstadoInscripcion = 'activas' | 'bajas' | 'todas'
+
+// Todos opcionales y combinables (AND). Sin estado, el back trae las activas.
+// q busca por DNI (parcial o con puntos) o por nombre y apellido, sin tildes ni mayúsculas.
+export interface InscripcionFiltros {
+  actividadId?: string
+  comisionId?: string
+  q?: string
+  estado?: EstadoInscripcion
+}
+
+// InscripcionListadoResponse: versión reducida para la tabla, que el back arma en una sola consulta.
+// A diferencia de Inscripcion, la actividad viene aparte (no dentro de la comisión) y la persona sin su estado.
+// El back la devuelve ordenada por apellido y nombre (y después actividad, comisión y fecha).
+export interface InscripcionListado {
+  inscripcionId: string
+  fechaInscripcion: string
+  activo: boolean
+  fechaBaja: string | null
+  persona: { personaId: string; dni: string; nombre: string; apellido: string; esSocioActivo: boolean }
+  comision: { comisionId: string; nombre: string; horario: string }
+  actividad: { actividadId: string; nombre: string }
+}
