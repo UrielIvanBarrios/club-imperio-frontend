@@ -111,7 +111,7 @@ function Contador({ titulo, valor, detalle, cargando, error, onRetry, to }: Cont
           <Button size="small" onClick={onRetry}>Reintentar</Button>
         </Box>
       ) : (
-        <Typography variant="h3" component="p" data-contador>
+        <Typography variant="h3" component="p" data-contador color="primary" sx={{ fontWeight: 700 }}>
           {valor}
         </Typography>
       )}

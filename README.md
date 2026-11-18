@@ -22,6 +22,8 @@ Hay dos roles: **ADMIN** ve todo, y **USER** ve todo menos Importar socios y Usu
 
 React 19 + TypeScript, con Vite. MUI para los componentes, React Router para las rutas, TanStack Query para los datos del back (caché, reintentos e invalidación), React Hook Form + Zod para los formularios.
 
+Tema propio en `src/theme.ts`: azul marino y dorado del club, tipografía Outfit (instalada con `@fontsource`, viaja en el build) y **modo claro y oscuro**. El botón sol/luna de la barra superior cambia el modo; la primera vez se usa la preferencia del sistema y, cuando el usuario elige, se recuerda en `localStorage`.
+
 ## Requisitos
 
 - **Node.js 22.12 o superior** (lo pide Vite 8; desarrollado con Node 24).
@@ -77,7 +79,8 @@ src/
   api/          cliente HTTP: token, manejo de 401/403 y mensajes de error del back
   auth/         sesión, login y rutas protegidas por rol
   layout/       menú lateral y barra superior (menu.tsx: una sola lista para el menú y los permisos)
-  components/   piezas compartidas: encabezado, estados vacío / error / cargando, formularios, toasts
+  theme.ts      tema de MUI: paleta de cada modo, tipografía, sombras y estilo de tablas, botones y menú
+  components/   piezas compartidas: encabezado, estados vacío / error / cargando, formularios, toasts, modo claro / oscuro
   lib/          utilidades: fechas, paginación, filtros en la URL
   features/     un módulo por pantalla
     <módulo>/

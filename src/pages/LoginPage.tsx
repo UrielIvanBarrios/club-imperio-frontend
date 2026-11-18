@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Box, Button, Paper, Typography } from '@mui/material'
+import { Alert, alpha, Box, Button, Paper, Typography } from '@mui/material'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Navigate, useLocation, useNavigate } from 'react-router'
@@ -39,11 +39,36 @@ export function LoginPage() {
   if (usuario) return <Navigate to={from} replace />
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', bgcolor: 'grey.100', p: 2 }}>
+    // Fondo con un halo de los colores del club, sacados del tema: se ve bien en claro y en oscuro
+    // (antes era grey.100, un gris claro fijo que en modo oscuro quedaba como un bloque blanco)
+    <Box
+      sx={(t) => ({
+        minHeight: '100vh', display: 'grid', placeItems: 'center', p: 2,
+        bgcolor: 'background.default',
+        backgroundImage: `radial-gradient(circle at 15% 10%, ${alpha(t.palette.primary.main, 0.18)}, transparent 45%),
+          radial-gradient(circle at 85% 90%, ${alpha(t.palette.secondary.main, 0.14)}, transparent 40%)`,
+      })}
+    >
       <Paper sx={{ p: 4, width: '100%', maxWidth: 400 }} elevation={3}>
-        <Typography variant="h5" component="h1" gutterBottom>
-          Club Imperio
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+          <Box
+            aria-hidden
+            sx={{
+              width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center',
+              bgcolor: 'secondary.main', color: 'secondary.contrastText', fontWeight: 700, fontSize: '1.2rem', letterSpacing: '-0.04em',
+            }}
+          >
+            CI
+          </Box>
+          <Box>
+            <Typography variant="h5" component="h1" sx={{ lineHeight: 1.1, textTransform: 'uppercase' }}>
+              Club Imperio
+            </Typography>
+            <Typography variant="overline" color="secondary.dark" sx={{ lineHeight: 1.4, display: 'block' }}>
+              Juniors
+            </Typography>
+          </Box>
+        </Box>
         <Typography color="text.secondary" sx={{ mb: 3 }}>
           Iniciá sesión para continuar
         </Typography>
